@@ -4,6 +4,12 @@
 ============================================================ */
 
 
+/* Show/hide the auth-page footer */
+function setAuthFooter(visible) {
+  const f = document.getElementById("authFooter");
+  if (f) f.style.display = visible ? "flex" : "none";
+}
+
 /* ============================================================
    DATA & STATE
 ============================================================ */
@@ -140,7 +146,32 @@ function markAllRead() {
 }
 
 
-/* ── RENDER NOTIFICATIONS (view-only, no reply) ───────────── */
+/* ── LIKE / ACKNOWLEDGE ───────────────────────────────────── */
+
+function likeNotif(notifId) {
+  if (!currentUser) return;
+  const myNotifs = notifications[currentUser.email] || [];
+  const n = myNotifs.find(x => x.id === notifId);
+  if (!n || n.liked) return;
+
+  n.liked = true;
+  saveNotif();
+
+  // Send acknowledgement back to the buyer
+  if (n.from) {
+    addNotification(n.from, {
+      title:    currentUser.name + " acknowledged your message",
+      message:  "Your inquiry about \"" + (n.itemName || "the item") + "\" has been seen. The seller liked your message! \uD83D\uDC4D",
+      from:     currentUser.email,
+      fromName: currentUser.name,
+      isAck:    true,
+    });
+  }
+
+  renderNotifList();
+}
+
+/* ── RENDER NOTIFICATIONS ─────────────────────────────────── */
 
 function renderNotifList() {
   const list   = $("notifList");
@@ -152,19 +183,38 @@ function renderNotifList() {
   }
 
   list.innerHTML = "";
-  notifs.forEach(n => {
+  notifs.forEach(function(n) {
     const div = document.createElement("div");
     div.className = "notif-item" + (n.unread ? " unread" : "");
 
-    div.innerHTML = `
-      <div class="notif-item-icon">✉️</div>
-      <div class="notif-item-body">
-        <div class="notif-item-title">${n.title || "New Message"}</div>
-        <div class="notif-item-msg">${n.message}</div>
-        <div class="notif-item-time">${timeAgo(n.time)}</div>
-      </div>
-      ${n.unread ? '<div class="notif-dot"></div>' : ""}
-    `;
+    const showLike = n.from && !n.isAck;
+    const liked    = !!n.liked;
+
+    const likeBtn = showLike
+      ? '<button class="btn-notif-like' + (liked ? " liked" : "") + '" onclick="likeNotif(' + n.id + ')" ' + (liked ? "disabled" : "") + ' title="' + (liked ? "Acknowledged" : "Acknowledge buyer") + '">' +
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="' + (liked ? "currentColor" : "none") + '" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>' +
+        (liked ? "Acknowledged" : "Acknowledge") +
+        '</button>'
+      : "";
+
+    // ── FIX: use a clean white SVG checkmark for ack notifications
+    //         instead of the ✅ emoji (which has a built-in green circle)
+    const notifIcon = n.isAck
+      ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+      : "\u2709\uFE0F";
+
+    div.innerHTML =
+      '<div class="notif-item-icon">' + notifIcon + "</div>" +
+      '<div class="notif-item-body">' +
+        '<div class="notif-item-title">' + (n.title || "New Message") + "</div>" +
+        '<div class="notif-item-msg">' + n.message + "</div>" +
+        '<div class="notif-item-footer">' +
+          '<span class="notif-item-time">' + timeAgo(n.time) + "</span>" +
+          likeBtn +
+        "</div>" +
+      "</div>" +
+      (n.unread ? '<div class="notif-dot"></div>' : "");
+
     list.appendChild(div);
   });
 }
@@ -879,11 +929,13 @@ $("signupEmail").addEventListener("input", function () {
 $("toSignup").onclick = () => {
   $("loginView").classList.add("hidden");
   $("signupView").classList.remove("hidden");
+  setAuthFooter(true);
 };
 
 $("toLogin").onclick = () => {
   $("signupView").classList.add("hidden");
   $("loginView").classList.remove("hidden");
+  setAuthFooter(true);
 };
 
 $("signupForm").addEventListener("submit", function (e) {
@@ -938,6 +990,7 @@ function logout() {
   closeMobileSheets();
   $("dashboardView").classList.add("hidden");
   $("loginView").classList.remove("hidden");
+  setAuthFooter(true);
   $("loginEmail").value    = "";
   $("loginPassword").value = "";
 }
@@ -953,6 +1006,7 @@ function showDashboard() {
   $("loginView").classList.add("hidden");
   $("signupView").classList.add("hidden");
   $("dashboardView").classList.remove("hidden");
+  setAuthFooter(false);
 
   const set = (id, val) => { const el = $(id); if (el) el.textContent = val; };
   set("avInitials", initials(currentUser.name));
