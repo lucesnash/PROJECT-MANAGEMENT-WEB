@@ -1,4 +1,4 @@
-/* ============================================================
+ /* ============================================================
    PAMILIHANG SILANGAN — Stylesheet
    University of the East Philippines
 ============================================================ */
@@ -4630,7 +4630,7 @@ y
 
 .rating-stars .star {
   font-size: 36px;
-  color: #ddd;
+  color: #fff;
   cursor: pointer;
   transition: color 0.15s, transform 0.15s;
   user-select: none;
@@ -4644,7 +4644,7 @@ y
 }
 
 .rating-stars .star.active {
-  color: #f5a623;
+  color: #f5c518;
   transform: scale(1.1);
 }
 
@@ -4658,7 +4658,7 @@ y
 
 /* Rate button in notification */
 .btn-notif-rate {
-  background: linear-gradient(135deg, #f5a623, #f7c948);
+  background: linear-gradient(135deg, var(--red), var(--red-mid));
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -4674,7 +4674,7 @@ y
 
 .btn-notif-rate:hover {
   transform: translateY(-1px);
-  box-shadow: 0 3px 10px rgba(245, 166, 35, 0.35);
+  box-shadow: 0 3px 10px rgba(139, 0, 0, 0.35);
 }
 
 .rated-label {

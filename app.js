@@ -916,14 +916,14 @@ function renderNotifList() {
          </button>`
       : "";
     const rateBtn = n.isRatingRequest && !n.rated
-      ? '<button class="btn-notif-rate" onclick="openRatingModal(\'' + (n.ratedSellerEmail || '').replace(/'/g, "\\'") + '\',\'' + (n.ratedSellerName || '').replace(/'/g, "\\'") + '\',' + n.id + ')">⭐ Rate Seller</button>'
+      ? '<button class="btn-notif-rate" onclick="openRatingModal(\'' + (n.ratedSellerEmail || '').replace(/'/g, "\\'") + '\',\'' + (n.ratedSellerName || '').replace(/'/g, "\\'") + '\',' + n.id + ')"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff" stroke="none" style="vertical-align:-1px;margin-right:4px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Rate Seller</button>'
       : n.isRatingRequest && n.rated
       ? '<span class="rated-label">✅ Rated</span>'
       : "";
     const notifIcon = n.isRatingReceived
-      ? "⭐"
+      ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="#fff" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'
       : n.isRatingRequest
-      ? "⭐"
+      ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="#fff" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'
       : n.isAck
       ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
       : "✉️";
@@ -1065,7 +1065,7 @@ function renderRecent() {
   const avail = products.filter(p => !p.soldOut && (now - p.id) <= ONE_DAY_MS).slice(0, 6);
   
   if (!avail.length) { 
-    el.innerHTML = '<div class="pd-empty">No recent listings in the last 24 hours.</div>'; 
+    el.innerHTML = '<div class="pd-empty">No recent listings.</div>'; 
     return; 
   }
   
@@ -1274,6 +1274,26 @@ $("lightbox").addEventListener("click", function(e) { if (e.target === this) clo
 document.addEventListener("keydown", e => {
   if (e.key === "Escape") { closeLightbox(); closeMobileSheets(); closeMobileSearch(); }
 });
+
+/* Swipe support for lightbox carousel */
+(function() {
+  let touchStartX = 0;
+  let touchEndX = 0;
+  const lbWrap = document.querySelector(".lightbox-carousel-wrap") || $("lightbox");
+  if (lbWrap) {
+    lbWrap.addEventListener("touchstart", function(e) {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+    lbWrap.addEventListener("touchend", function(e) {
+      touchEndX = e.changedTouches[0].screenX;
+      const diff = touchStartX - touchEndX;
+      if (Math.abs(diff) > 50 && lbImagesArray.length > 1) {
+        if (diff > 0) lbChange(1);   // swipe left → next
+        else lbChange(-1);            // swipe right → prev
+      }
+    }, { passive: true });
+  }
+})();
 
 /* ============================================================
    CONTACT SELLER MODAL
@@ -1496,7 +1516,7 @@ function markSold(id) {
     buyerEmails.forEach(buyerEmail => {
       addNotification(buyerEmail, {
         title:    "Rate your experience with " + sellerName,
-        message:  '"' + itemName + '" has been marked as sold! If you purchased this item, please rate the seller to help other buyers. ⭐',
+        message:  '"' + itemName + '" has been marked as sold! If you purchased this item, please rate the seller to help other buyers. ★',
         from:     sellerEmail,
         fromName: sellerName,
         itemId:   itemId,
@@ -1808,7 +1828,7 @@ function renderStarsHtml(avg, size) {
   size = size || 14;
   let html = "";
   for (let i = 1; i <= 5; i++) {
-    const fill = i <= Math.round(avg) ? "#f5a623" : "#ddd";
+    const fill = i <= Math.round(avg) ? "#f5c518" : "#ffffff";
     html += '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="' + fill + '" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
   }
   return html;
@@ -1901,7 +1921,7 @@ $("submitRatingBtn").addEventListener("click", function() {
   const r = getSellerRating(ratingTargetEmail);
   const trust = getTrustLabel(r.avg);
   addNotification(ratingTargetEmail, {
-    title:    currentUser.name + " rated you " + ratingValue + "/5 ⭐",
+    title:    currentUser.name + " rated you " + ratingValue + "/5 ★",
     message:  "You received a " + RATING_LABELS[ratingValue].toLowerCase() + " rating! Your overall rating is now " + r.avg + "/5 (" + r.count + " reviews). You are \"" + trust.label + "\".",
     from:     currentUser.email,
     fromName: currentUser.name,
