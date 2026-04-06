@@ -1,4 +1,4 @@
- /* ============================================================
+/* ============================================================
    PAMILIHANG SILANGAN — Stylesheet
    University of the East Philippines
 ============================================================ */
@@ -60,6 +60,322 @@ html {
 
 .mobile-only {
   display: none !important;
+}
+
+
+/* ── SKELETON LOADING ──────────────────────────────────────── */
+
+.skeleton-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(rgba(244,242,241,0.9), rgba(244,242,241,0.9)),
+    url('assets/log_back.png');
+  background-size: cover;
+  background-position: center;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.skeleton-loader.fade-out {
+  animation: fadeOut 0.4s ease-out forwards;
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #e8e8e8 0%,
+    #f4f4f4 50%,
+    #e8e8e8 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--r-sm);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Auth Skeleton (for login/signup pages) */
+.skeleton-auth-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.skeleton-auth-card {
+  background: white;
+  border-radius: var(--r);
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: var(--shadow-md);
+}
+
+.skeleton-auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.skeleton-auth-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
+
+.skeleton-auth-title {
+  flex: 1;
+  height: 24px;
+  max-width: 200px;
+}
+
+.skeleton-auth-heading {
+  width: 60%;
+  height: 28px;
+  margin-bottom: 12px;
+  border-radius: var(--r-sm);
+}
+
+.skeleton-auth-subheading {
+  width: 80%;
+  height: 16px;
+  margin-bottom: 32px;
+  border-radius: var(--r-sm);
+}
+
+.skeleton-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.skeleton-auth-input {
+  width: 100%;
+  height: 48px;
+  border-radius: var(--r-sm);
+}
+
+.skeleton-auth-button {
+  width: 100%;
+  height: 48px;
+  border-radius: 24px;
+  margin-top: 8px;
+}
+
+.skeleton-auth-footer {
+  width: 70%;
+  height: 16px;
+  margin: 24px auto 0;
+  border-radius: var(--r-sm);
+}
+
+@media (max-width: 768px) {
+  .skeleton-auth-card {
+    padding: 32px 24px;
+    max-width: 90%;
+  }
+}
+
+/* Dashboard Skeleton (used for transitions) */
+.skeleton-topbar {
+  height: 70px;
+  background: white;
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.skeleton-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.skeleton-logo-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.skeleton-logo-text {
+  width: 160px;
+  height: 24px;
+}
+
+.skeleton-search {
+  flex: 1;
+  max-width: 500px;
+  margin: 0 24px;
+  height: 42px;
+  border-radius: 21px;
+}
+
+.skeleton-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.skeleton-btn {
+  width: 100px;
+  height: 38px;
+  border-radius: 19px;
+}
+
+.skeleton-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+/* Skeleton Sidebar */
+.skeleton-sidebar {
+  position: fixed;
+  left: 0;
+  top: 70px;
+  bottom: 0;
+  width: var(--sidebar-w);
+  background: white;
+  border-right: 1px solid var(--border);
+  padding: 20px 16px;
+}
+
+.skeleton-menu-item {
+  height: 44px;
+  margin-bottom: 8px;
+  border-radius: var(--r-sm);
+}
+
+/* Skeleton Main Content */
+.skeleton-main {
+  margin-left: var(--sidebar-w);
+  padding: 24px;
+  margin-top: 70px;
+}
+
+.skeleton-filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.skeleton-filter {
+  width: 120px;
+  height: 36px;
+  border-radius: 18px;
+}
+
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.skeleton-card {
+  background: white;
+  border-radius: var(--r);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+
+.skeleton-card-img {
+  width: 100%;
+  height: 180px;
+  margin-bottom: 12px;
+  border-radius: var(--r-sm);
+}
+
+.skeleton-card-title {
+  width: 80%;
+  height: 20px;
+  margin-bottom: 8px;
+}
+
+.skeleton-card-price {
+  width: 60%;
+  height: 24px;
+  margin-bottom: 12px;
+}
+
+.skeleton-card-meta {
+  width: 100%;
+  height: 16px;
+}
+
+/* Mobile Skeleton */
+@media (max-width: 768px) {
+  .skeleton-sidebar {
+    display: none;
+  }
+
+  .skeleton-main {
+    margin-left: 0;
+    margin-top: 60px;
+    padding: 16px;
+  }
+
+  .skeleton-topbar {
+    height: 60px;
+    padding: 0 16px;
+  }
+
+  .skeleton-search {
+    margin: 0 12px;
+  }
+
+  .skeleton-actions {
+    gap: 8px;
+  }
+
+  .skeleton-btn {
+    width: 80px;
+  }
+
+  .skeleton-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .skeleton-mobile-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--mobile-nav-h);
+    background: white;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 16px;
+  }
+  
+  .skeleton-nav-item {
+    width: 50px;
+    height: 40px;
+    border-radius: var(--r-sm);
+  }
 }
 
 
@@ -383,18 +699,67 @@ html {
   stroke: #5a6a8a;
 }
 
-.fp-code-display {
-  font-size: 32px;
-  font-weight: 800;
-  letter-spacing: 10px;
-  color: #1a1a2e;
-  font-family: "DM Sans", monospace;
-  margin-bottom: 6px;
+/* Email instruction box (replaces simulated code preview) */
+.email-instruction-box {
+  background: #f0f7ff;
+  border: 1px solid #bdd7f5;
+  border-radius: var(--r-sm);
+  padding: 16px;
+  margin: 20px 0 24px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
 }
 
-.fp-code-expires {
-  font-size: 11px;
+.email-instruction-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  background: #2563eb;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.email-instruction-icon svg {
+  stroke: white;
+}
+
+.email-instruction-text {
+  flex: 1;
+}
+
+.email-instruction-text strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e40af;
+  margin-bottom: 4px;
+}
+
+.email-instruction-text p {
+  font-size: 12px;
+  color: #1e40af;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Code timer display */
+.code-timer-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 12px;
+  margin-bottom: 8px;
+  font-size: 12px;
   color: var(--muted);
+}
+
+.code-timer-display svg {
+  stroke: var(--muted);
 }
 
 /* OTP input row */
@@ -4683,4 +5048,3 @@ y
   font-weight: 600;
   margin-left: 8px;
 }
-

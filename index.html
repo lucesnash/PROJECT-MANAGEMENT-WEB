@@ -9,6 +9,35 @@
 </head>
 <body>
 
+<!-- ============================================================
+     SKELETON LOADER
+============================================================ -->
+<div id="skeletonLoader" class="skeleton-loader">
+  <!-- Auth/Login Skeleton -->
+  <div class="skeleton-auth-wrap">
+    <div class="skeleton-auth-card">
+      <!-- Logo skeleton -->
+      <div class="skeleton-auth-brand">
+        <div class="skeleton skeleton-auth-logo"></div>
+        <div class="skeleton skeleton-auth-title"></div>
+      </div>
+      
+      <!-- Title skeleton -->
+      <div class="skeleton skeleton-auth-heading"></div>
+      <div class="skeleton skeleton-auth-subheading"></div>
+      
+      <!-- Form fields skeleton -->
+      <div class="skeleton-auth-form">
+        <div class="skeleton skeleton-auth-input"></div>
+        <div class="skeleton skeleton-auth-input"></div>
+        <div class="skeleton skeleton-auth-button"></div>
+      </div>
+      
+      <!-- Footer skeleton -->
+      <div class="skeleton skeleton-auth-footer"></div>
+    </div>
+  </div>
+</div>
 
 <!-- ============================================================
      LOGIN VIEW
@@ -157,16 +186,21 @@
         </svg>
       </div>
       <div class="auth-title">Check Your Email</div>
-      <div class="auth-sub">We sent a 6-digit code to <strong id="fpEmailDisplay">your email</strong>. Enter it below.</div>
+      <div class="auth-sub">We sent a 6-digit verification code to <strong id="fpEmailDisplay">your email</strong>. Please check your inbox and enter the code below.</div>
 
-      <!-- Simulated email preview box -->
-      <div class="fp-code-preview" id="fpCodePreview">
-        <div class="fp-code-preview-label">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          Simulated email — your code is:
+      <!-- Email instruction box -->
+      <div class="email-instruction-box">
+        <div class="email-instruction-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="16" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
         </div>
-        <div class="fp-code-display" id="fpCodeDisplay">------</div>
-        <div class="fp-code-expires" id="fpCodeExpires">Expires in 10:00</div>
+        <div class="email-instruction-text">
+          <strong>Check your Gmail app or inbox</strong>
+          <p>The verification code has been sent to your UE email. It will expire in 10 minutes.</p>
+        </div>
       </div>
 
       <form id="forgotStep2Form">
@@ -181,12 +215,19 @@
             <input class="fp-otp-input" type="text" maxlength="1" data-idx="5" inputmode="numeric" pattern="[0-9]">
           </div>
         </div>
+        <div class="code-timer-display">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <span id="fpCodeExpires">Code expires in 10:00</span>
+        </div>
         <div class="fp-error" id="fpStep2Error"></div>
         <button type="submit" class="btn-auth">Verify Code</button>
       </form>
 
       <div class="fp-resend-row">
-        Didn't get it? <button type="button" class="fp-resend-btn" id="fpResendBtn">Resend Code</button>
+        Didn't receive it? <button type="button" class="fp-resend-btn" id="fpResendBtn">Resend Code</button>
         <span class="fp-resend-timer" id="fpResendTimer"></span>
       </div>
       <div class="auth-switch"><a id="fpBackToStep1">&#8592; Back</a></div>
@@ -342,7 +383,7 @@
 
 
 <!-- ============================================================
-     SIGNUP VIEW
+     SIGNUP VIEW - STEP 1: Enter Details
 ============================================================ -->
 <div id="signupView" class="hidden">
   <div class="auth-wrap">
@@ -354,9 +395,27 @@
           <div class="auth-brand-sub">Bili, Benta, Balik-Ulit</div>
         </div>
       </div>
+
+      <!-- Step indicator -->
+      <div class="fp-steps">
+        <div class="fp-step active">
+          <div class="fp-step-dot">1</div>
+          <div class="fp-step-label">Details</div>
+        </div>
+        <div class="fp-step-line"></div>
+        <div class="fp-step">
+          <div class="fp-step-dot">2</div>
+          <div class="fp-step-label">Verify</div>
+        </div>
+        <div class="fp-step-line"></div>
+        <div class="fp-step">
+          <div class="fp-step-dot">3</div>
+          <div class="fp-step-label">Complete</div>
+        </div>
+      </div>
+
       <div class="auth-title">Create account</div>
       <div class="auth-sub">Join using your UE school email</div>
-      <div id="signupSuccess" class="auth-success">&#10003; Account created! Redirecting to sign in...</div>
       <form id="signupForm">
         <div class="f"><label>Full Name</label><input type="text" id="signupName" placeholder="Juan dela Cruz" required></div>
         <div class="f">
@@ -393,9 +452,125 @@
             </button>
           </div>
         </div>
-        <button type="submit" class="btn-auth">Create Account</button>
+        <div class="fp-error" id="signupError"></div>
+        <button type="submit" class="btn-auth">Continue to Verification</button>
       </form>
       <div class="auth-switch">Already have an account? <a id="toLogin">Sign In</a></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     SIGNUP - STEP 2: Email Verification
+============================================================ -->
+<div id="signupStep2" class="hidden">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <div class="auth-brand-icon"><img src="assets/uelogo.png" alt="UE Logo"></div>
+        <div>
+          <div class="auth-brand-name">Pamilihang Silangan</div>
+          <div class="auth-brand-sub">Bili, Benta, Balik-Ulit</div>
+        </div>
+      </div>
+
+      <!-- Step indicator -->
+      <div class="fp-steps">
+        <div class="fp-step done">
+          <div class="fp-step-dot">&#10003;</div>
+          <div class="fp-step-label">Details</div>
+        </div>
+        <div class="fp-step-line active"></div>
+        <div class="fp-step active">
+          <div class="fp-step-dot">2</div>
+          <div class="fp-step-label">Verify</div>
+        </div>
+        <div class="fp-step-line"></div>
+        <div class="fp-step">
+          <div class="fp-step-dot">3</div>
+          <div class="fp-step-label">Complete</div>
+        </div>
+      </div>
+
+      <div class="fp-icon-wrap">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+      </div>
+      <div class="auth-title">Check Your Email</div>
+      <div class="auth-sub">We sent a 6-digit verification code to <strong id="signupEmailDisplay">your email</strong>. Please check your inbox and enter the code below.</div>
+
+      <!-- Email instruction box -->
+      <div class="email-instruction-box">
+        <div class="email-instruction-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="16" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+        </div>
+        <div class="email-instruction-text">
+          <strong>Check your Gmail app or inbox</strong>
+          <p>The verification code has been sent to your UE email. It will expire in 10 minutes.</p>
+        </div>
+      </div>
+
+      <form id="signupStep2Form">
+        <div class="f">
+          <label>6-Digit Verification Code</label>
+          <div class="fp-otp-wrap">
+            <input class="fp-otp-input signup-otp" type="text" maxlength="1" data-idx="0" inputmode="numeric" pattern="[0-9]">
+            <input class="fp-otp-input signup-otp" type="text" maxlength="1" data-idx="1" inputmode="numeric" pattern="[0-9]">
+            <input class="fp-otp-input signup-otp" type="text" maxlength="1" data-idx="2" inputmode="numeric" pattern="[0-9]">
+            <input class="fp-otp-input signup-otp" type="text" maxlength="1" data-idx="3" inputmode="numeric" pattern="[0-9]">
+            <input class="fp-otp-input signup-otp" type="text" maxlength="1" data-idx="4" inputmode="numeric" pattern="[0-9]">
+            <input class="fp-otp-input signup-otp" type="text" maxlength="1" data-idx="5" inputmode="numeric" pattern="[0-9]">
+          </div>
+        </div>
+        <div class="code-timer-display">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <span id="signupCodeExpires">Code expires in 10:00</span>
+        </div>
+        <div class="fp-error" id="signupStep2Error"></div>
+        <button type="submit" class="btn-auth">Verify & Create Account</button>
+      </form>
+
+      <div class="fp-resend-row">
+        Didn't receive it? <button type="button" class="fp-resend-btn" id="signupResendBtn">Resend Code</button>
+        <span class="fp-resend-timer" id="signupResendTimer"></span>
+      </div>
+      <div class="auth-switch"><a id="signupBackToStep1">&#8592; Back</a></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     SIGNUP - STEP 3: Success
+============================================================ -->
+<div id="signupSuccess" class="hidden">
+  <div class="auth-wrap">
+    <div class="auth-card" style="text-align:center;">
+      <div class="auth-brand" style="justify-content:center;">
+        <div class="auth-brand-icon"><img src="assets/uelogo.png" alt="UE Logo"></div>
+        <div>
+          <div class="auth-brand-name">Pamilihang Silangan</div>
+          <div class="auth-brand-sub">Bili, Benta, Balik-Ulit</div>
+        </div>
+      </div>
+      <div class="fp-success-icon">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <div class="auth-title">Account Created!</div>
+      <div class="auth-sub" style="margin-bottom:28px;">Your UE email has been verified successfully. You can now sign in and start trading!</div>
+      <button class="btn-auth" id="signupGoToLogin">Go to Sign In</button>
     </div>
   </div>
 </div>
@@ -769,7 +944,7 @@
             <div class="pd" id="profileDropdown">
               <div class="pd-head">
                 <div class="pd-name" id="pdName">User</div>
-                <div class="pd-email" id="pdEmail">user@ue.edu.ph</div>
+                <div class="pd-email" id="pdEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="5e2b2d3b2c1e2b3b703b3a2b702e36">[email&#160;protected]</a></div>
                 <div class="pd-badge" id="pdRole">Member</div>
                 <div class="pd-rating" id="pdRating"></div>
               </div>
@@ -810,7 +985,7 @@
         <div class="mpp-header">
           <div class="mpp-avatar" id="mppAvatar">U</div>
           <div class="mpp-name" id="mppName">User</div>
-          <div class="mpp-email" id="mppEmail">user@ue.edu.ph</div>
+          <div class="mpp-email" id="mppEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="85f0f6e0f7c5f0e0abe0e1f0abf5ed">[email&#160;protected]</a></div>
           <div class="mpp-badge" id="mppRole">Student</div>
           <div class="mpp-rating" id="mppRating"></div>
         </div>
@@ -961,7 +1136,7 @@
         <label>Leave a comment (optional)</label>
         <textarea id="ratingComment" rows="2" placeholder="How was the transaction?"></textarea>
       </div>
-      <button class="btn-mp" id="submitRatingBtn" style="width:100%;margin-top:8px;" disabled>Submit Rating</button>
+      <button class="btn-mp" id="submitRatingBtn" style="width:100%;margin-top:12px;" disabled>Submit Rating</button>
     </div>
   </div>
 </div>

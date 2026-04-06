@@ -5,6 +5,116 @@
 
 
 /* ============================================================
+   SKELETON LOADER
+============================================================ */
+
+// Show skeleton on page load/refresh for 1-2 seconds
+window.addEventListener('DOMContentLoaded', () => {
+  const skeletonLoader = document.getElementById('skeletonLoader');
+  const actualContent = document.querySelectorAll('#loginView, #marketplaceView, #adminPortal');
+  
+  // Hide actual content initially
+  actualContent.forEach(el => {
+    if (el) el.style.opacity = '0';
+  });
+  
+  // Random duration between 1000-2000ms for realistic loading
+  const loadingDuration = Math.floor(Math.random() * 1000) + 1000;
+  
+  setTimeout(() => {
+    // Fade out skeleton
+    skeletonLoader.classList.add('fade-out');
+    
+    // Show actual content
+    actualContent.forEach(el => {
+      if (el) el.style.transition = 'opacity 0.4s ease-in';
+      if (el) el.style.opacity = '1';
+    });
+    
+    // Remove skeleton from DOM after animation
+    setTimeout(() => {
+      skeletonLoader.remove();
+    }, 400);
+  }, loadingDuration);
+});
+
+// Function to show skeleton loading between view transitions
+function showSkeletonTransition(callback) {
+  // Create skeleton overlay
+  const skeletonHTML = `
+    <div id="transitionSkeleton" class="skeleton-loader" style="opacity: 0;">
+      <div class="skeleton-topbar">
+        <div class="skeleton-logo">
+          <div class="skeleton skeleton-logo-icon"></div>
+          <div class="skeleton skeleton-logo-text"></div>
+        </div>
+        <div class="skeleton skeleton-search"></div>
+        <div class="skeleton-actions">
+          <div class="skeleton skeleton-btn"></div>
+          <div class="skeleton skeleton-avatar"></div>
+        </div>
+      </div>
+      <div class="skeleton-sidebar">
+        <div class="skeleton skeleton-menu-item"></div>
+        <div class="skeleton skeleton-menu-item"></div>
+        <div class="skeleton skeleton-menu-item"></div>
+        <div class="skeleton skeleton-menu-item"></div>
+        <div class="skeleton skeleton-menu-item"></div>
+      </div>
+      <div class="skeleton-main">
+        <div class="skeleton-filters">
+          <div class="skeleton skeleton-filter"></div>
+          <div class="skeleton skeleton-filter"></div>
+          <div class="skeleton skeleton-filter"></div>
+          <div class="skeleton skeleton-filter"></div>
+        </div>
+        <div class="skeleton-grid">
+          ${Array(6).fill('').map(() => `
+            <div class="skeleton-card">
+              <div class="skeleton skeleton-card-img"></div>
+              <div class="skeleton skeleton-card-title"></div>
+              <div class="skeleton skeleton-card-price"></div>
+              <div class="skeleton skeleton-card-meta"></div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div class="skeleton-mobile-nav mobile-only">
+        <div class="skeleton skeleton-nav-item"></div>
+        <div class="skeleton skeleton-nav-item"></div>
+        <div class="skeleton skeleton-nav-item"></div>
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', skeletonHTML);
+  const skeleton = document.getElementById('transitionSkeleton');
+  
+  // Fade in skeleton
+  requestAnimationFrame(() => {
+    skeleton.style.transition = 'opacity 0.2s ease-in';
+    skeleton.style.opacity = '1';
+  });
+  
+  // Show skeleton for 1-2 seconds
+  const duration = Math.floor(Math.random() * 1000) + 1000;
+  
+  setTimeout(() => {
+    // Execute the callback (switch views)
+    if (callback) callback();
+    
+    // Fade out skeleton
+    skeleton.classList.add('fade-out');
+    
+    // Remove skeleton after fade
+    setTimeout(() => {
+      skeleton.remove();
+    }, 400);
+  }, duration);
+}
+
+
+/* ============================================================
    DATA & STATE
 ============================================================ */
 
@@ -126,7 +236,7 @@ function fmtTime(sec) {
   return m + ":" + (s < 10 ? "0" : "") + s;
 }
 
-/* Start the 10-minute expiry countdown shown in the code preview */
+/* Start the 10-minute expiry countdown */
 function startExpireCountdown() {
   clearInterval(fpExpireTimer);
   fpCodeExpiry = Date.now() + 10 * 60 * 1000;
@@ -134,11 +244,10 @@ function startExpireCountdown() {
   function tick() {
     const remaining = Math.max(0, Math.round((fpCodeExpiry - Date.now()) / 1000));
     const el = $("fpCodeExpires");
-    if (el) el.textContent = remaining > 0 ? "Expires in " + fmtTime(remaining) : "Code expired";
+    if (el) el.textContent = remaining > 0 ? "Code expires in " + fmtTime(remaining) : "Code expired";
     if (remaining === 0) {
       clearInterval(fpExpireTimer);
-      const codeEl = $("fpCodeDisplay");
-      if (codeEl) codeEl.textContent = "EXPIRED";
+      if (el) el.style.color = "#d32f2f";
       fpCode = "";
     }
   }
@@ -171,13 +280,15 @@ function startResendCooldown() {
   fpResendTimer = setInterval(tick, 1000);
 }
 
-/* Send (simulate) the code */
+/* Send verification code via email */
 function sendCode(email) {
   fpCode = generateCode();
-  const codeEl = $("fpCodeDisplay");
-  if (codeEl) codeEl.textContent = fpCode;
   const emailEl = $("fpEmailDisplay");
   if (emailEl) emailEl.textContent = email;
+  
+  // Send email via Gmail
+  sendVerificationEmail(email, fpCode, 'forgot');
+  
   startExpireCountdown();
   startResendCooldown();
   /* Clear OTP inputs */
@@ -1715,6 +1826,20 @@ $("signupEmail").addEventListener("input", function() {
 $("toSignup").onclick = () => { $("loginView").classList.add("hidden"); $("signupView").classList.remove("hidden"); };
 $("toLogin").onclick  = () => { $("signupView").classList.add("hidden"); $("loginView").classList.remove("hidden"); };
 
+/* ============================================================
+   SIGNUP VERIFICATION FLOW
+   Step 1: Enter details → generate 6-digit code & send email
+   Step 2: Enter code → verify with 10-min expiry
+   Step 3: Account created → redirect to login
+============================================================ */
+
+let signupData = { name: "", email: "", role: "", password: "" };
+let signupCode = "";
+let signupCodeExpiry = 0;
+let signupResendTimer = null;
+let signupExpireTimer = null;
+
+// STEP 1: Submit registration details
 $("signupForm").addEventListener("submit", function(e) {
   e.preventDefault();
   const name  = $("signupName").value.trim();
@@ -1722,20 +1847,230 @@ $("signupForm").addEventListener("submit", function(e) {
   const role  = $("signupRole").value;
   const pw    = $("signupPassword").value;
   const cpw   = $("signupConfirm").value;
-  if (!email.endsWith("@ue.edu.ph")) { alert("Only @ue.edu.ph school email addresses are allowed."); return; }
-  if (pw !== cpw)   { alert("Passwords do not match."); return; }
-  if (users[email]) { alert("This email is already registered."); return; }
-  users[email] = { name, email, role, password: pw };
-  localStorage.setItem("registeredUsers", JSON.stringify(users));
-  $("signupSuccess").style.display = "block";
-  setTimeout(() => {
-    $("signupSuccess").style.display = "none";
-    $("signupForm").reset();
-    $("signupView").classList.add("hidden");
-    $("loginView").classList.remove("hidden");
-    $("loginEmail").value = email;
-  }, 1800);
+  
+  // Clear previous error
+  $("signupError").textContent = "";
+  
+  // Validation
+  if (!email.endsWith("@ue.edu.ph")) { 
+    $("signupError").textContent = "Only @ue.edu.ph school email addresses are allowed."; 
+    return; 
+  }
+  if (pw !== cpw) { 
+    $("signupError").textContent = "Passwords do not match."; 
+    return; 
+  }
+  if (pw.length < 6) {
+    $("signupError").textContent = "Password must be at least 6 characters.";
+    return;
+  }
+  if (users[email]) { 
+    $("signupError").textContent = "This email is already registered."; 
+    return; 
+  }
+  
+  // Store signup data temporarily
+  signupData = { name, email, role, password: pw };
+  
+  // Generate 6-digit code
+  signupCode = String(Math.floor(100000 + Math.random() * 900000));
+  signupCodeExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes
+  
+  // Send verification email via Gmail
+  sendVerificationEmail(email, signupCode, 'signup');
+  
+  // Show verification step
+  $("signupView").classList.add("hidden");
+  $("signupStep2").classList.remove("hidden");
+  $("signupEmailDisplay").textContent = email;
+  
+  // Start expiry countdown
+  startSignupExpireCountdown();
+  startSignupResendCooldown();
+  
+  // Clear OTP inputs
+  document.querySelectorAll(".signup-otp").forEach(inp => inp.value = "");
+  document.querySelector(".signup-otp").focus();
 });
+
+// Function to send verification email via Gmail
+function sendVerificationEmail(email, code, type) {
+  const subject = type === 'signup' 
+    ? 'Pamilihang Silangan - Email Verification Code'
+    : 'Pamilihang Silangan - Password Reset Code';
+  
+  const body = type === 'signup'
+    ? `Hello,\n\nThank you for registering with Pamilihang Silangan!\n\nYour verification code is: ${code}\n\nThis code will expire in 10 minutes.\n\nIf you didn't request this code, please ignore this email.\n\nBest regards,\nPamilihang Silangan Team\nUniversity of the East`
+    : `Hello,\n\nYou requested to reset your password for Pamilihang Silangan.\n\nYour password reset code is: ${code}\n\nThis code will expire in 10 minutes.\n\nIf you didn't request this code, please ignore this email.\n\nBest regards,\nPamilihang Silangan Team\nUniversity of the East`;
+  
+  // Create mailto link
+  const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  
+  // Open Gmail (or default mail client)
+  window.location.href = mailtoLink;
+  
+  // Small delay to allow mail client to open
+  setTimeout(() => {
+    // Reset the hash to prevent mailto from affecting navigation
+    if (window.location.href.includes('mailto:')) {
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+  }, 100);
+}
+
+// STEP 2: Verify code
+$("signupStep2Form").addEventListener("submit", function(e) {
+  e.preventDefault();
+  $("signupStep2Error").textContent = "";
+  
+  // Collect OTP
+  const inputs = document.querySelectorAll(".signup-otp");
+  const code = Array.from(inputs).map(inp => inp.value).join("");
+  
+  if (code.length !== 6) {
+    $("signupStep2Error").textContent = "Please enter the 6-digit code.";
+    return;
+  }
+  
+  // Check expiry
+  if (Date.now() > signupCodeExpiry) {
+    $("signupStep2Error").textContent = "Code expired. Please request a new one.";
+    return;
+  }
+  
+  // Verify code
+  if (code !== signupCode) {
+    $("signupStep2Error").textContent = "Invalid code. Please try again.";
+    // Clear inputs
+    inputs.forEach(inp => inp.value = "");
+    inputs[0].focus();
+    return;
+  }
+  
+  // Code is correct! Create the account
+  users[signupData.email] = {
+    name: signupData.name,
+    email: signupData.email,
+    role: signupData.role,
+    password: signupData.password
+  };
+  localStorage.setItem("registeredUsers", JSON.stringify(users));
+  
+  // Clear timers
+  if (signupResendTimer) clearInterval(signupResendTimer);
+  if (signupExpireTimer) clearInterval(signupExpireTimer);
+  
+  // Show success page
+  $("signupStep2").classList.add("hidden");
+  $("signupSuccess").classList.remove("hidden");
+});
+
+// Navigate back from step 2
+$("signupBackToStep1").addEventListener("click", function() {
+  if (signupResendTimer) clearInterval(signupResendTimer);
+  if (signupExpireTimer) clearInterval(signupExpireTimer);
+  $("signupStep2").classList.add("hidden");
+  $("signupView").classList.remove("hidden");
+});
+
+// Go to login from success page
+$("signupGoToLogin").addEventListener("click", function() {
+  $("signupSuccess").classList.add("hidden");
+  $("loginView").classList.remove("hidden");
+  $("loginEmail").value = signupData.email;
+  $("signupForm").reset();
+  signupData = { name: "", email: "", role: "", password: "" };
+});
+
+// Resend code
+$("signupResendBtn").addEventListener("click", function() {
+  if (this.disabled) return;
+  
+  // Generate new code
+  signupCode = String(Math.floor(100000 + Math.random() * 900000));
+  signupCodeExpiry = Date.now() + 10 * 60 * 1000;
+  
+  // Send new email
+  sendVerificationEmail(signupData.email, signupCode, 'signup');
+  
+  $("signupStep2Error").textContent = "";
+  
+  // Clear inputs
+  document.querySelectorAll(".signup-otp").forEach(inp => inp.value = "");
+  document.querySelector(".signup-otp").focus();
+  
+  startSignupExpireCountdown();
+  startSignupResendCooldown();
+});
+
+// OTP input auto-focus
+document.querySelectorAll(".signup-otp").forEach((input, index, inputs) => {
+  input.addEventListener("input", function() {
+    if (this.value.length === 1 && index < inputs.length - 1) {
+      inputs[index + 1].focus();
+    }
+  });
+  
+  input.addEventListener("keydown", function(e) {
+    if (e.key === "Backspace" && !this.value && index > 0) {
+      inputs[index - 1].focus();
+    }
+  });
+  
+  // Only allow numbers
+  input.addEventListener("beforeinput", function(e) {
+    if (e.data && !/^\d$/.test(e.data)) {
+      e.preventDefault();
+    }
+  });
+});
+
+function startSignupExpireCountdown() {
+  if (signupExpireTimer) clearInterval(signupExpireTimer);
+  
+  const updateTimer = () => {
+    const remaining = signupCodeExpiry - Date.now();
+    if (remaining <= 0) {
+      $("signupCodeExpires").textContent = "Code expired";
+      $("signupCodeExpires").style.color = "#d32f2f";
+      clearInterval(signupExpireTimer);
+      return;
+    }
+    const mins = Math.floor(remaining / 60000);
+    const secs = Math.floor((remaining % 60000) / 1000);
+    $("signupCodeExpires").textContent = `Code expires in ${mins}:${String(secs).padStart(2, '0')}`;
+    $("signupCodeExpires").style.color = "";
+  };
+  
+  updateTimer();
+  signupExpireTimer = setInterval(updateTimer, 1000);
+}
+
+function startSignupResendCooldown() {
+  const btn = $("signupResendBtn");
+  const timer = $("signupResendTimer");
+  let countdown = 60;
+  
+  btn.disabled = true;
+  btn.style.opacity = "0.5";
+  btn.style.cursor = "not-allowed";
+  
+  const updateCooldown = () => {
+    if (countdown <= 0) {
+      clearInterval(signupResendTimer);
+      btn.disabled = false;
+      btn.style.opacity = "";
+      btn.style.cursor = "";
+      timer.textContent = "";
+      return;
+    }
+    timer.textContent = `(${countdown}s)`;
+    countdown--;
+  };
+  
+  updateCooldown();
+  signupResendTimer = setInterval(updateCooldown, 1000);
+}
 
 $("loginForm").addEventListener("submit", function(e) {
   e.preventDefault();
@@ -1775,25 +2110,27 @@ $("logoutBtn").onclick = logout;
 ============================================================ */
 
 function showDashboard() {
-  $("loginView").classList.add("hidden");
-  $("signupView").classList.add("hidden");
-  $("adminDashboardView").classList.add("hidden");
-  $("dashboardView").classList.remove("hidden");
+  showSkeletonTransition(() => {
+    $("loginView").classList.add("hidden");
+    $("signupView").classList.add("hidden");
+    $("adminDashboardView").classList.add("hidden");
+    $("dashboardView").classList.remove("hidden");
 
-  const set = (id, val) => { const el = $(id); if (el) el.textContent = val; };
-  set("avInitials", initials(currentUser.name));
-  set("avName",     currentUser.name.split(" ")[0]);
-  set("avRole",     currentUser.role);
-  set("pdName",     currentUser.name);
-  set("pdEmail",    currentUser.email);
-  set("pdRole",     currentUser.role);
+    const set = (id, val) => { const el = $(id); if (el) el.textContent = val; };
+    set("avInitials", initials(currentUser.name));
+    set("avName",     currentUser.name.split(" ")[0]);
+    set("avRole",     currentUser.role);
+    set("pdName",     currentUser.name);
+    set("pdEmail",    currentUser.email);
+    set("pdRole",     currentUser.role);
 
-  expiry();
-  renderAll();
-  if (typeof renderRatingBadge === "function") {
-    renderRatingBadge(currentUser.email, "pdRating");
-    renderRatingBadge(currentUser.email, "avRating");
-  }
+    expiry();
+    renderAll();
+    if (typeof renderRatingBadge === "function") {
+      renderRatingBadge(currentUser.email, "pdRating");
+      renderRatingBadge(currentUser.email, "avRating");
+    }
+  });
 }
 
 
