@@ -11,12 +11,75 @@
 // Show skeleton on page load/refresh for 1-2 seconds
 window.addEventListener('DOMContentLoaded', () => {
   const skeletonLoader = document.getElementById('skeletonLoader');
-  const actualContent = document.querySelectorAll('#loginView, #marketplaceView, #adminPortal');
   
-  // Hide actual content initially
-  actualContent.forEach(el => {
-    if (el) el.style.opacity = '0';
-  });
+  // Check if user is already logged in
+  const savedUser = localStorage.getItem('currentUser');
+  
+  if (savedUser) {
+    // User is logged in - show dashboard skeleton and hide login view immediately
+    try {
+      currentUser = JSON.parse(savedUser);
+      
+      // Hide all auth views immediately to prevent flash
+      const authViews = document.querySelectorAll('#loginView, #signupView, #signupStep2, #signupSuccess, #forgotStep1, #forgotStep2, #forgotStep3, #forgotSuccess, #adminLoginView');
+      authViews.forEach(view => {
+        if (view) view.style.display = 'none';
+      });
+      
+      // Replace skeleton with dashboard skeleton
+      skeletonLoader.innerHTML = `
+        <div class="skeleton-topbar">
+          <div class="skeleton-logo">
+            <div class="skeleton skeleton-logo-icon"></div>
+            <div class="skeleton skeleton-logo-text"></div>
+          </div>
+          <div class="skeleton skeleton-search"></div>
+          <div class="skeleton-actions">
+            <div class="skeleton skeleton-btn"></div>
+            <div class="skeleton skeleton-avatar"></div>
+          </div>
+        </div>
+        <div class="skeleton-sidebar">
+          <div class="skeleton skeleton-menu-item"></div>
+          <div class="skeleton skeleton-menu-item"></div>
+          <div class="skeleton skeleton-menu-item"></div>
+          <div class="skeleton skeleton-menu-item"></div>
+          <div class="skeleton skeleton-menu-item"></div>
+        </div>
+        <div class="skeleton-main">
+          <div class="skeleton-filters">
+            <div class="skeleton skeleton-filter"></div>
+            <div class="skeleton skeleton-filter"></div>
+            <div class="skeleton skeleton-filter"></div>
+            <div class="skeleton skeleton-filter"></div>
+          </div>
+          <div class="skeleton-grid">
+            ${Array(6).fill('').map(() => `
+              <div class="skeleton-card">
+                <div class="skeleton skeleton-card-img"></div>
+                <div class="skeleton skeleton-card-title"></div>
+                <div class="skeleton skeleton-card-price"></div>
+                <div class="skeleton skeleton-card-meta"></div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        <div class="skeleton-mobile-nav mobile-only">
+          <div class="skeleton skeleton-nav-item"></div>
+          <div class="skeleton skeleton-nav-item"></div>
+          <div class="skeleton skeleton-nav-item"></div>
+        </div>
+      `;
+      skeletonLoader.style.background = 'var(--bg)';
+      skeletonLoader.style.display = 'flex';
+      skeletonLoader.style.flexDirection = 'column';
+      
+    } catch (e) {
+      // If there's an error parsing, clear the saved user
+      localStorage.removeItem('currentUser');
+      currentUser = null;
+    }
+  }
   
   // Random duration between 1000-2000ms for realistic loading
   const loadingDuration = Math.floor(Math.random() * 1000) + 1000;
@@ -25,11 +88,40 @@ window.addEventListener('DOMContentLoaded', () => {
     // Fade out skeleton
     skeletonLoader.classList.add('fade-out');
     
-    // Show actual content
-    actualContent.forEach(el => {
-      if (el) el.style.transition = 'opacity 0.4s ease-in';
-      if (el) el.style.opacity = '1';
-    });
+    // Show appropriate content based on login status
+    if (currentUser) {
+      // Show dashboard
+      const dashboardView = document.getElementById('dashboardView');
+      if (dashboardView) {
+        dashboardView.style.transition = 'opacity 0.4s ease-in';
+        dashboardView.style.opacity = '1';
+        dashboardView.classList.remove('hidden');
+      }
+      
+      // Initialize dashboard
+      const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      set("avInitials", initials(currentUser.name));
+      set("avName", currentUser.name.split(" ")[0]);
+      set("avRole", currentUser.role);
+      set("pdName", currentUser.name);
+      set("pdEmail", currentUser.email);
+      set("pdRole", currentUser.role);
+      
+      expiry();
+      renderAll();
+      if (typeof renderRatingBadge === "function") {
+        renderRatingBadge(currentUser.email, "pdRating");
+        renderRatingBadge(currentUser.email, "avRating");
+      }
+    } else {
+      // Show login view
+      const loginView = document.getElementById('loginView');
+      if (loginView) {
+        loginView.style.transition = 'opacity 0.4s ease-in';
+        loginView.style.opacity = '1';
+        loginView.style.display = '';
+      }
+    }
     
     // Remove skeleton from DOM after animation
     setTimeout(() => {
@@ -40,9 +132,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // Function to show skeleton loading between view transitions
 function showSkeletonTransition(callback) {
-  // Create skeleton overlay
+  // Create skeleton overlay with dashboard layout
   const skeletonHTML = `
-    <div id="transitionSkeleton" class="skeleton-loader" style="opacity: 0;">
+    <div id="transitionSkeleton" class="skeleton-loader" style="opacity: 0; background: var(--bg); flex-direction: column;">
       <div class="skeleton-topbar">
         <div class="skeleton-logo">
           <div class="skeleton skeleton-logo-icon"></div>
@@ -654,7 +746,7 @@ function renderAdminOverview() {
   /* Category breakdown bars */
   const catDiv = $("adminCatBreakdown");
   catDiv.innerHTML = "";
-  const maxCount = Math.max(...CATS.map(c => products.filter(p => p.category === c).length), 1);
+  const maxCount = 50;
 
   CATS.forEach(cat => {
     const count = products.filter(p => p.category === cat).length;
@@ -1903,20 +1995,81 @@ function sendVerificationEmail(email, code, type) {
     ? `Hello,\n\nThank you for registering with Pamilihang Silangan!\n\nYour verification code is: ${code}\n\nThis code will expire in 10 minutes.\n\nIf you didn't request this code, please ignore this email.\n\nBest regards,\nPamilihang Silangan Team\nUniversity of the East`
     : `Hello,\n\nYou requested to reset your password for Pamilihang Silangan.\n\nYour password reset code is: ${code}\n\nThis code will expire in 10 minutes.\n\nIf you didn't request this code, please ignore this email.\n\nBest regards,\nPamilihang Silangan Team\nUniversity of the East`;
   
-  // Create mailto link
-  const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  
-  // Open Gmail (or default mail client)
-  window.location.href = mailtoLink;
-  
-  // Small delay to allow mail client to open
-  setTimeout(() => {
-    // Reset the hash to prevent mailto from affecting navigation
-    if (window.location.href.includes('mailto:')) {
-      window.history.replaceState(null, '', window.location.pathname);
-    }
-  }, 100);
+  // Show email simulation modal instead of opening mailto
+  showEmailSimulation(email, subject, body, code);
 }
+
+// Function to show email simulation modal
+function showEmailSimulation(recipient, subject, body, code) {
+  const modal = $("emailSimModal");
+  
+  // Set email details
+  $("emailSimRecipient").textContent = recipient;
+  $("emailSimSubject").textContent = subject;
+  $("emailSimBody").textContent = body;
+  $("emailSimCode").textContent = code;
+  
+  // Set current time
+  const now = new Date();
+  const timeStr = now.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  });
+  $("emailSimTime").textContent = timeStr;
+  
+  // Show modal
+  modal.classList.add("open");
+}
+
+// Close email simulation modal
+$("closeEmailSim").addEventListener("click", () => {
+  $("emailSimModal").classList.remove("open");
+});
+
+$("closeEmailSimBtn").addEventListener("click", () => {
+  $("emailSimModal").classList.remove("open");
+});
+
+$("emailSimModal").addEventListener("click", e => {
+  if (e.target === e.currentTarget) {
+    e.currentTarget.classList.remove("open");
+  }
+});
+
+// Copy code button functionality
+$("copyCodeBtn").addEventListener("click", function() {
+  const code = $("emailSimCode").textContent;
+  
+  // Try to copy to clipboard
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(code).then(() => {
+      // Visual feedback
+      this.textContent = "✓ Copied!";
+      this.classList.add("copied");
+      
+      setTimeout(() => {
+        this.innerHTML = `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+          Copy Code
+        `;
+        this.classList.remove("copied");
+      }, 2000);
+    }).catch(err => {
+      console.error('Failed to copy:', err);
+      alert('Code: ' + code);
+    });
+  } else {
+    // Fallback for older browsers
+    alert('Your verification code: ' + code);
+  }
+});
 
 // STEP 2: Verify code
 $("signupStep2Form").addEventListener("submit", function(e) {
@@ -2095,11 +2248,9 @@ function logout() {
   currentUser       = null;
   mobileProfileOpen = false;
   localStorage.removeItem("currentUser");
-  closeMobileSheets();
-  $("dashboardView").classList.add("hidden");
-  $("loginView").classList.remove("hidden");
-  $("loginEmail").value    = "";
-  $("loginPassword").value = "";
+  
+  // Reload the page to ensure clean state and show login skeleton
+  window.location.reload();
 }
 
 $("logoutBtn").onclick = logout;

@@ -275,6 +275,68 @@ html {
   margin-top: 70px;
 }
 
+/* Skeleton Stats Cards - matches the dashboard stats */
+.skeleton-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.skeleton-stat-card {
+  background: white;
+  border-radius: var(--r);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  height: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skeleton-stat-card.large {
+  grid-column: span 1;
+}
+
+.skeleton-stat-header {
+  width: 60%;
+  height: 14px;
+  border-radius: var(--r-sm);
+}
+
+.skeleton-stat-number {
+  width: 40%;
+  height: 48px;
+  border-radius: var(--r-sm);
+}
+
+.skeleton-stat-badge {
+  width: 80px;
+  height: 24px;
+  border-radius: 12px;
+  margin-top: auto;
+}
+
+/* Section header */
+.skeleton-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.skeleton-section-title {
+  width: 180px;
+  height: 24px;
+  border-radius: var(--r-sm);
+}
+
+.skeleton-section-count {
+  width: 60px;
+  height: 20px;
+  border-radius: var(--r-sm);
+}
+
 .skeleton-filters {
   display: flex;
   gap: 12px;
@@ -324,9 +386,39 @@ html {
   height: 16px;
 }
 
+/* Recent listings sidebar */
+.skeleton-recent-sidebar {
+  position: fixed;
+  right: 24px;
+  top: 94px;
+  width: 280px;
+  background: white;
+  border-radius: var(--r);
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+
+.skeleton-recent-title {
+  width: 140px;
+  height: 20px;
+  margin-bottom: 16px;
+  border-radius: var(--r-sm);
+}
+
+.skeleton-recent-item {
+  width: 100%;
+  height: 60px;
+  margin-bottom: 12px;
+  border-radius: var(--r-sm);
+}
+
 /* Mobile Skeleton */
 @media (max-width: 768px) {
   .skeleton-sidebar {
+    display: none;
+  }
+
+  .skeleton-recent-sidebar {
     display: none;
   }
 
@@ -351,6 +443,15 @@ html {
 
   .skeleton-btn {
     width: 80px;
+  }
+
+  .skeleton-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .skeleton-stat-card {
+    height: 120px;
   }
 
   .skeleton-grid {
@@ -1382,7 +1483,9 @@ html {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 18px;
+  align-items: start;
 }
+
 
 
 /* ── Admin Panel ───────────────────────────────────────────── */
@@ -3573,11 +3676,13 @@ y
   top: 0;
   left: 0;
   right: 0;
-  min-height: calc(100vh - 56px);
+  min-height: 100vh;
   background: var(--bg);
   overflow-y: auto;
   z-index: 10;
   animation: slideUp 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  padding-bottom: var(--mobile-nav-h);
+  /* Add padding at bottom to prevent content being hidden by nav */
 }
 
 @keyframes slideUp {
@@ -3816,7 +3921,8 @@ y
 }
 
 .mpp-logout-wrap {
-  padding: 16px 20px 8px;
+  padding: 16px 20px calc(var(--mobile-nav-h) + 20px);
+  /* Extra padding at bottom to clear the mobile nav bar */
 }
 
 .mpp-logout-btn {
@@ -4348,7 +4454,8 @@ y
   }
 
   .mobile-profile-page {
-    top: 56px;
+    top: 0;
+    /* Start from top instead of below topbar for full coverage */
   }
 
   /* Forgot password on small screens */
@@ -5047,4 +5154,176 @@ y
   color: #22a55a;
   font-weight: 600;
   margin-left: 8px;
+}
+/* ============================================================
+   EMAIL SIMULATION MODAL
+============================================================ */
+
+.email-sim-info {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.email-sim-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.email-sim-header {
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+}
+
+.email-sim-from,
+.email-sim-to,
+.email-sim-subject {
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: #334155;
+}
+
+.email-sim-from strong,
+.email-sim-to strong,
+.email-sim-subject strong {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.email-sim-time {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 8px;
+}
+
+.email-sim-body {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #475569;
+  margin-bottom: 20px;
+  white-space: pre-line;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+}
+
+.email-sim-code-highlight {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  margin: 20px 0;
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.25);
+}
+
+.code-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.code-display {
+  font-size: 42px;
+  font-weight: 700;
+  color: #fff;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 8px;
+  margin: 8px 0 16px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  user-select: all;
+}
+
+.code-copy-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: "DM Sans", sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.code-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.code-copy-btn:active {
+  transform: translateY(0);
+}
+
+.code-copy-btn.copied {
+  background: rgba(34, 197, 94, 0.3);
+  border-color: rgba(34, 197, 94, 0.5);
+}
+
+.code-copy-btn svg {
+  flex-shrink: 0;
+}
+
+.email-sim-footer {
+  text-align: center;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .email-sim-card {
+    background: #1e293b;
+    border-color: #334155;
+  }
+  
+  .email-sim-header {
+    border-bottom-color: #334155;
+  }
+  
+  .email-sim-from,
+  .email-sim-to,
+  .email-sim-subject {
+    color: #cbd5e1;
+  }
+  
+  .email-sim-from strong,
+  .email-sim-to strong,
+  .email-sim-subject strong {
+    color: #f1f5f9;
+  }
+  
+  .email-sim-body {
+    background: #0f172a;
+    color: #cbd5e1;
+  }
+  
+  .email-sim-footer {
+    border-top-color: #334155;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .code-display {
+    font-size: 32px;
+    letter-spacing: 6px;
+  }
+  
+  .email-sim-card {
+    padding: 16px;
+  }
+  
+  .email-sim-code-highlight {
+    padding: 20px 16px;
+  }
 }

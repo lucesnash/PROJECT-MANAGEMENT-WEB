@@ -1141,6 +1141,66 @@
   </div>
 </div>
 
+<!-- EMAIL SIMULATION MODAL -->
+<div class="overlay" id="emailSimModal">
+  <div class="modal-box" style="max-width:600px;">
+    <div class="modal-head">
+      <div class="modal-ttl">📧 Email Inbox Simulation</div>
+      <button class="modal-x" id="closeEmailSim">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="email-sim-info">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 16px; display: block;">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+        <p style="text-align: center; color: #64748b; margin-bottom: 20px;">
+          In a real application, this code would be sent to your email. For demonstration purposes, here's your verification code:
+        </p>
+      </div>
+      
+      <div class="email-sim-card">
+        <div class="email-sim-header">
+          <div class="email-sim-from">
+            <strong>From:</strong> noreply@pamilihangsilangan.ue.edu.ph
+          </div>
+          <div class="email-sim-to">
+            <strong>To:</strong> <span id="emailSimRecipient"></span>
+          </div>
+          <div class="email-sim-subject">
+            <strong>Subject:</strong> <span id="emailSimSubject"></span>
+          </div>
+          <div class="email-sim-time" id="emailSimTime"></div>
+        </div>
+        
+        <div class="email-sim-body" id="emailSimBody"></div>
+        
+        <div class="email-sim-code-highlight">
+          <div class="code-label">Your Verification Code</div>
+          <div class="code-display" id="emailSimCode"></div>
+          <button class="code-copy-btn" id="copyCodeBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            Copy Code
+          </button>
+        </div>
+        
+        <div class="email-sim-footer">
+          <p style="color: #94a3b8; font-size: 13px; margin: 0;">
+            This code will expire in <strong id="emailSimExpiry">10 minutes</strong>.
+          </p>
+        </div>
+      </div>
+      
+      <div style="margin-top: 20px; text-align: center;">
+        <button class="btn-mp" id="closeEmailSimBtn" style="padding: 10px 24px;">Got it, Continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="app.js"></script>
 </body>
 </html>
