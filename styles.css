@@ -4993,6 +4993,11 @@ y
   line-height: 1;
 }
 
+.rating-stars-small span {
+  color: gold; /* fill */
+  -webkit-text-stroke: 0.5px black; /* thin outline */
+}
+
 .rating-avg {
   font-weight: 700;
   color: var(--text);
@@ -5102,11 +5107,12 @@ y
 
 .rating-stars .star {
   font-size: 36px;
-  color: #fff;
+  color: #ddd;
   cursor: pointer;
   transition: color 0.15s, transform 0.15s;
   user-select: none;
   line-height: 1;
+  -webkit-text-stroke: 0.5px rgba(0, 0, 0, 0.3);
 }
 
 .rating-stars .star:hover,
